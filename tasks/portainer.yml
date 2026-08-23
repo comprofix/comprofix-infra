@@ -28,4 +28,3 @@
       traefik.http.services.portainer.loadbalancer.server.port: "9443"
       traefik.http.services.portainer.loadbalancer.server.scheme: "https"
     pull: true
-    recreate: true

@@ -72,4 +72,3 @@
       traefik.http.routers.traefik-secure.tls.domains[1].sans: "*.comprofix.xyz"
       traefik.http.routers.traefik-secure.service: "api@internal"
     pull: true
-    recreate: true
