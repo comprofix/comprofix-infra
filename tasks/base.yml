@@ -1,0 +1,53 @@
+---
+- name: Ensure debian-archive-keyring is installed
+  apt:
+    name: debian-archive-keyring
+    state: present
+    update_cache: yes
+  become: yes
+
+- name: Update APT cache
+  apt:
+    update_cache: yes
+    force_apt_get: yes
+  when: ansible_distribution in ['Debian', 'Ubuntu']
+
+- name: Upgrade all installed packages to latest
+  apt:
+    name: "*"
+    state: latest
+    force_apt_get: yes
+  become: yes
+  when: ansible_distribution in ['Debian', 'Ubuntu']
+
+- name: Dist-upgrade packages (handle removals and replacements)
+  apt:
+    upgrade: dist
+    force_apt_get: yes
+  become: yes
+  when: ansible_distribution in ['Debian', 'Ubuntu']
+
+- name: Install required packages
+  apt:
+    name: "{{ install_packages }}"
+    state: present
+  become: yes
+  when: ansible_distribution in ['Debian', 'Ubuntu']
+  register: apt_result
+
+- name: Find all EXTERNALLY-MANAGED files under /usr/lib/python*
+  find:
+    paths: /usr/lib
+    patterns: "EXTERNALLY-MANAGED"
+    file_type: file
+    recurse: yes
+  register: externally_managed_files
+  become: yes
+
+- name: Delete EXTERNALLY-MANAGED files
+  file:
+    path: "{{ item.path }}"
+    state: absent
+  loop: "{{ externally_managed_files.files }}"
+  when: externally_managed_files.matched > 0
+  become: yes

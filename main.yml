@@ -1,0 +1,73 @@
+---
+- hosts: all
+  become: yes
+  name: Configure all servers
+  pre_tasks:
+    - name: Create directories
+      file:
+        path: "/data"
+        state: directory
+
+  roles:
+    - role: grzegorzfranus.fail2ban
+      vars:
+        fail2ban_ignoreip:
+          - 127.0.0.1/8 # loopback
+          - 10.0.0.0/8 # Private
+          - 172.16.0.0/12 # Private
+          - 192.168.0.0/16 # Private
+          - 169.254.0.0/16 # link-local / APIPA
+          - 100.64.0.0/10 # CGNAT
+          - 203.0.113.0/24 # TEST-NETs
+          - 192.0.2.0/24 # TEST-NETs
+          - 198.51.100.0/24 # TEST-NETs
+          - ::1 # ULA - fc00::/7 # Private
+          - fe80::/10 # Private
+        fail2ban_bantime: "1h"
+        fail2ban_findtime: "30m"
+        fail2ban_maxretry: 3
+        fail2ban_custom_jail_files:
+          - name: sshd-strict # This will create /etc/fail2ban/jail.d/sshd-strict.conf
+            content: |
+              [sshd-strict]
+              enabled = true
+              filter = sshd
+              port = ssh
+              logpath = journal
+              backend = systemd
+              maxretry = 3
+              bantime = 3600
+              findtime = 300
+
+    - role: geerlingguy.docker
+      docker_users:
+        - administrator
+
+  tasks:
+    - name: Gather facts (always, even with tags)
+      ansible.builtin.setup:
+      tags: always
+
+    - name: Update Debian
+      import_tasks: tasks/base.yml
+
+    - name: Deploy traefik
+      import_tasks: tasks/traefik.yml
+
+    - name: Deploy Dozzle
+      import_tasks: tasks/dozzle.yml
+
+    - name: Deploy Portainer
+      import_tasks: tasks/portainer.yml
+
+    - name: Configure Unattended Upgrades
+      template:
+        src: ../templates/50unattended-upgrades.j2
+        dest: "/etc/apt/apt.conf.d/50unattended-upgrades"
+        mode: "0600"
+
+    - name: Restart unattended-upgrades
+      service:
+        name: unattended-upgrades
+        state: restarted
+        enabled: true

@@ -1,0 +1,20 @@
+ansible_user: administrator
+data_folder: "/data"
+install_packages:
+  - apt-transport-https
+  - ca-certificates
+  - curl
+  - vim
+  - git
+  - htop
+  - jq
+  - mc
+  - net-tools
+  - unattended-upgrades
+  - sendemail
+
+# Host() rule for the traefik dashboard. Defaults to the host's own FQDN
+# (correct for vps01/vps02, which each need their own rule); lab overrides
+# this to a fixed "traefik.comprofix.xyz" in group_vars/lab.yml since it's
+# a single host and that's the URL already in use.
+traefik_host: "{{ inventory_hostname }}"

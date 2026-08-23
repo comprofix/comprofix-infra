@@ -1,0 +1,23 @@
+---
+- name: Create/Update the dozzle container
+  docker_container:
+    name: dozzle
+    image: amir20/dozzle:v10.7.3
+    restart_policy: unless-stopped
+    networks:
+      - name: proxy
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    labels:
+      traefik.enable: "true"
+      traefik.http.routers.dozzle.rule: "Host(`dozzle{{ traefik_host | regex_search('[0-9]+') | default('', true) }}.{{ traefik_domain }}`)"
+      traefik.http.middlewares.dozzle-auth.basicauth.users: "{{ traefik_api_password }}"
+      traefik.http.middlewares.dozzle-https-redirect.redirectscheme.scheme: "https"
+      traefik.http.middlewares.sslheader.headers.customrequestheaders.X-Forwarded-Proto: "https"
+      traefik.http.routers.dozzle.middlewares: "traefik-auth"
+      traefik.http.routers.dozzle.entrypoints: "https"
+      traefik.http.routers.dozzle.tls: "true"
+      traefik.http.services.dozzle.loadbalancer.server.port: "8080"
+      traefik.http.services.dozzle.loadbalancer.server.scheme: "http"
+    pull: true
+    recreate: true

@@ -1,0 +1,68 @@
+---
+http:
+  routers:
+{% if 'lab' in group_names %}
+    jellyfin-router:
+      entryPoints:
+        - https
+      rule: "Host(`jellyfin.comprofix.xyz`)"
+      service: jellyfin-service
+      tls: {}
+      middlewares:
+        - jellyfin-headers
+{% endif %}
+
+  services:
+{% if 'lab' in group_names %}
+    jellyfin-service:
+      loadBalancer:
+        servers:
+          - url: http://jellyfin-srv.comprofix.xyz:8096
+{% endif %}
+
+  middlewares:
+    https-redirect:
+      redirectScheme:
+        scheme: https
+        permanent: true
+
+    default-headers:
+      headers:
+        frameDeny: true
+        sslRedirect: true
+        browserXssFilter: true
+        contentTypeNosniff: true
+        forceSTSHeader: true
+        stsIncludeSubdomains: true
+        stsPreload: true
+        stsSeconds: 15552000
+        customFrameOptionsValue: SAMEORIGIN
+        customRequestHeaders:
+          X-Forwarded-Proto: https
+{% if 'lab' in group_names %}
+
+    jellyfin-headers:
+      headers:
+        frameDeny: false               # Jellyfin uses iframes for some features
+        browserXssFilter: true
+        contentTypeNosniff: true
+        forceSTSHeader: true
+        stsIncludeSubdomains: true
+        stsPreload: true
+        stsSeconds: 15552000
+        customRequestHeaders:
+          X-Forwarded-Proto: https
+{% endif %}
+
+    default-whitelist:
+      IPAllowList:
+        sourceRange:
+        - "10.0.0.0/8"
+        - "192.168.0.0/16"
+        - "172.16.0.0/12"
+        - "100.64.0.0/10"
+
+    secured:
+      chain:
+        middlewares:
+        - default-headers

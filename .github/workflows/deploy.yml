@@ -1,0 +1,113 @@
+name: Deploy
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy-lab:
+    runs-on: self-hosted
+    # Run entire job **inside a container that already has Ansible**
+    container:
+      image: quay.io/ansible/creator-ee:latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+
+      - name: Configure SSH
+        run: |
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+
+          # Write known hosts
+          echo "${{ secrets.SSH_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
+          chmod 644 ~/.ssh/known_hosts
+
+          # Write private key
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+
+          # Optionally write public key if needed
+          echo "${{ secrets.SSH_PUBLIC_KEY }}" > ~/.ssh/id_rsa.pub
+          chmod 644 ~/.ssh/id_rsa.pub
+
+          # Start SSH agent and add private key in memory
+          eval "$(ssh-agent -s)"
+          ssh-add <(echo "${{ secrets.SSH_PRIVATE_KEY }}")
+
+          # Optional config (disable strict host checking if desired)
+          echo "Host *" > ~/.ssh/config
+          echo "  StrictHostKeyChecking no" >> ~/.ssh/config
+          chmod 600 ~/.ssh/config
+
+      - name: Install Galaxy Roles
+        run: ansible-galaxy install -r requirements.yml
+
+      - name: Create vars file
+        run: |
+          echo 'traefik_api_password: "${{ secrets.TRAEFIK_API_PASSWORD }}"' > vars.yml
+          echo 'CF_API_EMAIL: "${{ secrets.CF_API_EMAIL }}"' >> vars.yml
+          echo 'CF_DNS_API_TOKEN: "${{ secrets.CF_DNS_API_TOKEN }}"' >> vars.yml
+          echo 'traefik_api_user: "admin"' >> vars.yml
+
+      - name: Run Playbook
+        run: |
+          ansible-playbook main.yml --private-key ~/.ssh/id_rsa -e "@vars.yml" --limit lab
+
+      - name: Cleanup vars file
+        run: rm -f vars.yml
+
+  deploy-vps:
+    runs-on: ubuntu-latest
+    # Run entire job **inside a container that already has Ansible**
+    container:
+      image: quay.io/ansible/creator-ee:latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+
+      - name: Configure SSH
+        run: |
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+
+          # Write known hosts
+          echo "${{ secrets.SSH_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
+          chmod 644 ~/.ssh/known_hosts
+
+          # Write private key
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+
+          # Optionally write public key if needed
+          echo "${{ secrets.SSH_PUBLIC_KEY }}" > ~/.ssh/id_rsa.pub
+          chmod 644 ~/.ssh/id_rsa.pub
+
+          # Start SSH agent and add private key in memory
+          eval "$(ssh-agent -s)"
+          ssh-add <(echo "${{ secrets.SSH_PRIVATE_KEY }}")
+
+          # Optional config (disable strict host checking if desired)
+          echo "Host *" > ~/.ssh/config
+          echo "  StrictHostKeyChecking no" >> ~/.ssh/config
+          chmod 600 ~/.ssh/config
+
+      - name: Install Galaxy Roles
+        run: ansible-galaxy install -r requirements.yml
+
+      - name: Create vars file
+        run: |
+          echo 'traefik_api_password: "${{ secrets.TRAEFIK_API_PASSWORD }}"' > vars.yml
+          echo 'CF_API_EMAIL: "${{ secrets.CF_API_EMAIL }}"' >> vars.yml
+          echo 'CF_DNS_API_TOKEN: "${{ secrets.CF_DNS_API_TOKEN }}"' >> vars.yml
+          echo 'traefik_api_user: "admin"' >> vars.yml
+
+      - name: Run Playbook
+        run: |
+          ansible-playbook main.yml --private-key ~/.ssh/id_rsa -e "@vars.yml" --limit vps
+
+      - name: Cleanup vars file
+        run: rm -f vars.yml

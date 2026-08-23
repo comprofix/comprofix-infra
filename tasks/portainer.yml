@@ -1,0 +1,31 @@
+---
+- name: Create directories
+  file:
+    path: "{{ item }}"
+    state: directory
+    mode: "0755"
+  with_items:
+    - "/data/portainer"
+    - "/data/portainer/data"
+
+- name: Create Portainer container
+  docker_container:
+    name: portainer
+    image: portainer/portainer-ee:2.44.0
+    restart_policy: unless-stopped
+    networks:
+      - name: proxy
+    ports:
+      - "8000:8000"  # Edge agent
+    volumes:
+      - /data/portainer:/data
+      - /var/run/docker.sock:/var/run/docker.sock
+    labels:
+      traefik.enable: "true"
+      traefik.http.routers.portainer.rule: "Host(`portainer{{ traefik_host | regex_search('[0-9]+') | default('', true) }}.{{ traefik_domain }}`)"
+      traefik.http.routers.portainer.entrypoints: "https"
+      traefik.http.routers.portainer.tls: "true"
+      traefik.http.services.portainer.loadbalancer.server.port: "9443"
+      traefik.http.services.portainer.loadbalancer.server.scheme: "https"
+    pull: true
+    recreate: true

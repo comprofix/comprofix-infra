@@ -1,0 +1,16 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    ":semanticCommitTypeAll(chore)"
+  ],
+  "automerge": true,
+  "automergeType": "branch",
+  "automergeStrategy": "rebase",
+  "commitBodyTable": true,
+  "ignoreTests": true,
+  "major": {
+    "automerge": false,
+    "commitMessagePrefix": "chore(deps-major): ",
+    "labels": ["dependencies", "breaking"]
+  }
+}

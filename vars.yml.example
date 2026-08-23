@@ -1,0 +1,37 @@
+---
+# Copy this file to vars.yml and fill in real values, then run:
+#
+#   ansible-playbook main.yml -e "@vars.yml" --limit lab   # or --limit vps
+#
+# vars.yml is listed in .gitignore and must NEVER be committed - it holds
+# secrets (traefik_api_password, CF_DNS_API_TOKEN). In CI this same file is
+# generated on the fly from GitHub Actions secrets (see
+# .github/workflows/deploy.yml) and deleted after the run; this example
+# mirrors those same keys so you can run the playbook locally without
+# pushing a change first.
+#
+# Note: traefik_host is deliberately NOT set here. group_vars/lab.yml and
+# group_vars/vps.yml derive it per group (fixed "traefik.comprofix.xyz" for
+# lab, per-host inventory_hostname for vps01/vps02). Do not add
+# traefik_host to your local vars.yml, or every host in the play will be
+# forced onto whichever value you set - this was the exact bug fixed in
+# homelab-vps commit a59a8c3.
+
+# Traefik dashboard basic-auth. This must be a full htpasswd-style
+# "user:hashed-password" string (used verbatim as the basicauth.users
+# label) - not a bare password. Generate with:
+#   htpasswd -nB admin
+# GitHub secret: TRAEFIK_API_PASSWORD
+traefik_api_password: "admin:$2y$05$REPLACE_WITH_HTPASSWD_HASH"
+
+# Not currently referenced by any task/template, but generated in CI -
+# kept here for parity.
+traefik_api_user: "admin"
+
+# Cloudflare account email used by Traefik's DNS-01 challenge.
+# GitHub secret: CF_API_EMAIL
+CF_API_EMAIL: "you@example.com"
+
+# Cloudflare API token (Zone:DNS:Edit scope) used by Traefik's DNS-01 challenge.
+# GitHub secret: CF_DNS_API_TOKEN
+CF_DNS_API_TOKEN: "REPLACE_WITH_CLOUDFLARE_DNS_API_TOKEN"

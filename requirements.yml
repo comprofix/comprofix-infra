@@ -1,0 +1,11 @@
+collections:
+  - name: community.docker
+    version: ">=4.6.0"
+
+roles:
+  - name: grzegorzfranus.fail2ban
+    src: git+https://github.com/grzegorzfranus/ansible-role-fail2ban
+    version: main
+  - name: geerlingguy.docker
+    src: git+https://github.com/geerlingguy/ansible-role-docker
+    version: master
