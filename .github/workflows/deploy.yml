@@ -59,7 +59,6 @@ jobs:
           echo 'traefik_api_password: "${{ secrets.TRAEFIK_API_PASSWORD }}"' > vars.yml
           echo 'CF_API_EMAIL: "${{ secrets.CF_API_EMAIL }}"' >> vars.yml
           echo 'CF_DNS_API_TOKEN: "${{ secrets.CF_DNS_API_TOKEN }}"' >> vars.yml
-          echo 'traefik_api_user: "admin"' >> vars.yml
 
       - name: Run Playbook
         run: |
@@ -112,7 +111,6 @@ jobs:
           echo 'traefik_api_password: "${{ secrets.TRAEFIK_API_PASSWORD }}"' > vars.yml
           echo 'CF_API_EMAIL: "${{ secrets.CF_API_EMAIL }}"' >> vars.yml
           echo 'CF_DNS_API_TOKEN: "${{ secrets.CF_DNS_API_TOKEN }}"' >> vars.yml
-          echo 'traefik_api_user: "admin"' >> vars.yml
 
       - name: Run Playbook
         run: |

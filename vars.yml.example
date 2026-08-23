@@ -24,10 +24,6 @@
 # GitHub secret: TRAEFIK_API_PASSWORD
 traefik_api_password: "admin:$2y$05$REPLACE_WITH_HTPASSWD_HASH"
 
-# Not currently referenced by any task/template, but generated in CI -
-# kept here for parity.
-traefik_api_user: "admin"
-
 # Cloudflare account email used by Traefik's DNS-01 challenge.
 # GitHub secret: CF_API_EMAIL
 CF_API_EMAIL: "you@example.com"
