@@ -5,6 +5,7 @@ api:
 entryPoints:
   http:
     address: ":80"
+    allowACMEByPass: true
     http:
       redirections:
         entryPoint:
@@ -42,3 +43,9 @@ certificatesResolvers:
         resolvers:
           - "1.1.1.1:53"
           - "1.0.0.1:53"
+  letsencrypt-http:
+    acme:
+      email: {{ CF_API_EMAIL }}
+      storage: acme.json
+      httpChallenge:
+        entryPoint: http
