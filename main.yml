@@ -71,3 +71,10 @@
         name: unattended-upgrades
         state: restarted
         enabled: true
+
+  handlers:
+    - name: Restart traefik container
+      docker_container:
+        name: traefik
+        state: started
+        restart: true

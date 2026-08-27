@@ -18,6 +18,7 @@
     src: ../templates/traefik.yml.j2
     dest: "/data/traefik/config/traefik.yml"
     mode: "0600"
+  notify: Restart traefik container
 
 - name: Copy Traefik extra config
   template:
