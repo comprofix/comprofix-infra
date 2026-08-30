@@ -2,7 +2,7 @@
 - name: Create/Update the dozzle container
   docker_container:
     name: dozzle
-    image: amir20/dozzle:v10.7.4
+    image: amir20/dozzle:v10.7.5
     restart_policy: unless-stopped
     networks:
       - name: proxy
