@@ -11,7 +11,7 @@
 - name: Create Portainer container
   docker_container:
     name: portainer
-    image: portainer/portainer-ee:2.45.3
+    image: portainer/portainer-ee:3.0.0
     restart_policy: unless-stopped
     networks:
       - name: proxy
