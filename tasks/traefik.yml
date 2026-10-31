@@ -37,7 +37,7 @@
 - name: Create traefik Container
   docker_container:
     name: traefik
-    image: traefik:v3.7.16
+    image: traefik:v3.7.17
     restart_policy: unless-stopped
     networks:
       - name: "proxy"
